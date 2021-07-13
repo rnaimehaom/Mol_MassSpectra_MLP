@@ -1,11 +1,11 @@
 <!--
  * @Date: 2021-07-08 17:58:04
  * @LastEditors: yuhhong
- * @LastEditTime: 2021-07-09 14:14:58
+ * @LastEditTime: 2021-07-13 16:21:55
 -->
 # Mass Spectrum Prediction from Molecular Fingerprint
 
-This is an implementation of mass spectrum prediction from the [Extended Connectivity Fingerprint (ECFP)](https://pubs.acs.org/doi/10.1021/ci100050t) and the [Extended 3-Dimensional Fingerprint (E3FP)](https://pubs.acs.org/doi/abs/10.1021/acs.jmedchem.7b00696) with a simple 5 layers' MLP model. 
+This is an implementation of mass spectrum prediction from the [Extended Connectivity Fingerprint (ECFP)](https://pubs.acs.org/doi/10.1021/ci100050t) and the [Extended 3-Dimensional Fingerprint (E3FP)](https://pubs.acs.org/doi/abs/10.1021/acs.jmedchem.7b00696) with a simple 5 layers' MLP model. The inputs are the SMILES strings of the molecules and the output is the MS2 level mass spectrum of the molecules. 
 
 ## Set up
 
@@ -56,7 +56,15 @@ python main.py --out_dim 3000 --train_data_path ./data/GNPS/train_posi_main_GNPS
 	--test_data_path ./data/GNPS/test_posi_main_GNPS.mgf \
 	--data_type mgf \
 	--log_dir ./logs \
-	--checkpoint_path ./check_point/gnps_posi.pt
+	--checkpoint_path ./check_point/gnps_posi.pt \
+	--resume_path ./check_point/gnps_posi.pt 
+python main.py --out_dim 3000 --train_data_path ./data/GNPS/train_posi_main_GNPS.mgf \
+	--test_data_path ./data/GNPS/test_posi_main_GNPS.mgf \
+	--data_type mgf \
+	--log_dir ./logs \
+	--checkpoint_path ./check_point/gnps_posi.pt \
+	--resume_path ./check_point/gnps_posi.pt \
+	--num_mlp_layers 12
 # (negative) 
 python main.py --out_dim 3000 --train_data_path ./data/GNPS/train_nega_main_GNPS.mgf \
 	--test_data_path ./data/GNPS/test_nega_main_GNPS.mgf \
@@ -74,10 +82,9 @@ python main.py --out_dim 3000 --train_data_path ./data/GNPS/train_nega_main_GNPS
 | ----------------- | ----------- | ------------------------------------------ |
 | NIST17 (positive) | ECFP        | 0.3779                                     |
 | NIST17 (negative) | ECFP        | 0.3066                                     |
-| GNPS (positive)   | ECFP        | *0.3407*                                   |
+| GNPS (positive)   | ECFP        | 0.3629                                     |
 | GNPS (negative)   | ECFP        | 0.5146                                     |
 | NIST17 (positive) | E3FP        |                                            |
 | NIST17 (negative) | E3FP        |                                            |
 | GNPS (positive)   | E3FP        |                                            |
 | GNPS (negative)   | E3FP        |                                            |
-
