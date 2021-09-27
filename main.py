@@ -1,7 +1,7 @@
 '''
 Date: 2021-07-08 16:49:04
 LastEditors: yuhhong
-LastEditTime: 2021-07-09 14:20:12
+LastEditTime: 2021-07-23 04:03:35
 '''
 import torch
 from torch.utils.data import DataLoader
@@ -21,7 +21,7 @@ import random
 
 from rdkit import Chem
 # suppress rdkit warning
-from rdkit import RDLogger    
+from rdkit import RDLogger
 RDLogger.DisableLog('rdApp.*')
 from pyteomics import mgf
 
@@ -92,13 +92,13 @@ def batch_filter(supp, out_dim=2000, data_type='sdf'):
                 continue
         yield item
 
-def load_data(data_path, data_type, in_dim, out_dim, radius, num_workers, batch_size): 
+def load_data(data_path, data_type, in_dim, out_dim, radius, fp_type, num_workers, batch_size): 
     if data_type == 'sdf':
         supp=Chem.SDMolSupplier(data_path)
-        dataset = NISTDataset([item for item in batch_filter(supp, out_dim, data_type)], in_dim=in_dim, out_dim=out_dim, radius=radius)
+        dataset = NISTDataset([item for item in batch_filter(supp, out_dim, data_type)], in_dim=in_dim, out_dim=out_dim)
     elif data_type == 'mgf': 
         supp=mgf.read(data_path)
-        dataset = GNPSDataset([item for item in batch_filter(supp, out_dim, data_type)], in_dim=in_dim, out_dim=out_dim, radius=radius)
+        dataset = GNPSDataset([item for item in batch_filter(supp, out_dim, data_type)], in_dim=in_dim, out_dim=out_dim)
     else:
         print('Data Type Error. Please chooes a dataset from [sdf | mgf].')
         exit()
@@ -129,12 +129,14 @@ def main_mlp():
     parser.add_argument('--out_dim', type=int, default=2000,
                         help='output dimensionality (default: 2000)')
     parser.add_argument('--train_subset', action='store_true')
-    parser.add_argument('--epochs', type=int, default=100,
-                        help='number of epochs to train (default: 100)')
+    parser.add_argument('--epochs', type=int, default=200,
+                        help='number of epochs to train (default: 200)')
     parser.add_argument('--num_workers', type=int, default=0,
                         help='number of workers (default: 0)')
     parser.add_argument('--radius', type=int, default=2,
                         help='radius (default: 2)')
+    parser.add_argument('--fp_type', type=str, default='2d',
+                        help='fingerprint type [2d | 3d] (default: 2d)')
 
     parser.add_argument('--train_data_path', type=str, default = '', help='path to training data')
     parser.add_argument('--test_data_path', type=str, default = '', help='path to test data')
@@ -151,8 +153,8 @@ def main_mlp():
     torch.cuda.manual_seed(42)
     random.seed(42)
 
-    train_loader = load_data(data_path=args.train_data_path, data_type=args.data_type, in_dim=args.in_dim, out_dim=args.out_dim, radius=args.radius, num_workers=args.num_workers, batch_size=args.batch_size)
-    valid_loader = load_data(data_path=args.test_data_path, data_type=args.data_type, in_dim=args.in_dim, out_dim=args.out_dim, radius=args.radius, num_workers=args.num_workers, batch_size=args.batch_size)
+    train_loader = load_data(data_path=args.train_data_path, data_type=args.data_type, in_dim=args.in_dim, out_dim=args.out_dim, radius=args.radius, fp_type=args.fp_type, num_workers=args.num_workers, batch_size=args.batch_size)
+    valid_loader = load_data(data_path=args.test_data_path, data_type=args.data_type, in_dim=args.in_dim, out_dim=args.out_dim, radius=args.radius, fp_type=args.fp_type, num_workers=args.num_workers, batch_size=args.batch_size)
     
     device = torch.device("cuda:" + str(args.device)) if torch.cuda.is_available() else torch.device("cpu")
     model = MLP(num_mlp_layers=args.num_mlp_layers, in_dim=args.in_dim, emb_dim=args.emb_dim, out_dim=args.out_dim, drop_ratio=args.drop_ratio).to(device)
